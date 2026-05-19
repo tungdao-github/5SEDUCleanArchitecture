@@ -29,7 +29,27 @@ public class GetByIdEndpoint(IMediator mediator)
       s.Summary = "Get a product by ID";
       s.Description = "Retrieves a specific product by its unique identifier. Returns detailed product information including ID, name, and unit price.";
       s.ExampleRequest = new GetProductByIdRequest { ProductId = 1 };
-      s.ResponseExamples[200] = new ProductRecord(1, "Laptop", 999.99m);
+      s.ResponseExamples[200] = ProductRecordFactory.FromDto(new ProductDto(
+        ProductId.From(1),
+        "React & TypeScript",
+        "react-typescript",
+        "EduClean",
+        "Programming",
+        "programming",
+        499000m,
+        1299000m,
+        4.8m,
+        120,
+        2400,
+        "40 giờ",
+        120,
+        "Trung cấp",
+        "Tiếng Việt",
+        "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400&h=225&fit=crop",
+        "Sample course",
+        true,
+        false,
+        false));
 
       // Document possible responses
       s.Responses[200] = "Product found and returned successfully";
@@ -70,5 +90,5 @@ public sealed class GetProductByIdMapper
   : Mapper<GetProductByIdRequest, ProductRecord, ProductDto>
 {
   public override ProductRecord FromEntity(ProductDto e)
-    => new(e.Id.Value, e.Name, e.UnitPrice);
+    => ProductRecordFactory.FromDto(e);
 }

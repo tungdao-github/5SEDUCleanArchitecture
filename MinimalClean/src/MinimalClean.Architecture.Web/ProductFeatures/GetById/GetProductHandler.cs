@@ -14,6 +14,26 @@ public class GetProductHandler(IReadRepository<Product> _repository)
     var entity = await _repository.FirstOrDefaultAsync(spec, cancellationToken);
     if (entity == null) return Result.NotFound();
 
-    return new ProductDto(entity.Id, entity.Name, entity.UnitPrice);
+    return new ProductDto(
+      entity.Id,
+      entity.Name,
+      entity.Slug,
+      entity.Instructor,
+      entity.Category,
+      entity.CategorySlug,
+      entity.UnitPrice,
+      entity.OriginalPrice,
+      entity.Rating,
+      entity.RatingCount,
+      entity.Students,
+      entity.Duration,
+      entity.Lessons,
+      entity.Level,
+      entity.Language,
+      entity.Thumbnail,
+      entity.Description,
+      entity.IsBestseller,
+      entity.IsNew,
+      entity.IsFlashSale);
   }
 }

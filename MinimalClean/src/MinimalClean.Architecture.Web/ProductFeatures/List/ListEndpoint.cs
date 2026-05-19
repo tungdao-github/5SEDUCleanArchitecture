@@ -39,8 +39,27 @@ public class ListEndpoint(IMediator mediator) : Endpoint<ListProductsRequest, Pr
       s.ResponseExamples[200] = new ProductListResponse(
         new List<ProductRecord>
         {
-          new(1, "Sample Product 1", 9.99m),
-          new(2, "Sample Product 2", 19.99m)
+          ProductRecordFactory.FromDto(new ProductDto(
+            Domain.ProductAggregate.ProductId.From(1),
+            "Sample Course",
+            "sample-course",
+            "EduClean",
+            "Programming",
+            "programming",
+            499000m,
+            1299000m,
+            4.8m,
+            120,
+            2400,
+            "40 giờ",
+            120,
+            "Trung cấp",
+            "Tiếng Việt",
+            "https://images.unsplash.com/photo-1633356122544-f134324a6cee?w=400&h=225&fit=crop",
+            "Sample course",
+            true,
+            false,
+            false))
         },
         1, 10, 2, 1);
 
@@ -117,7 +136,7 @@ public sealed class ListProductsMapper
   public override ProductListResponse FromEntity(PagedResult<ProductDto> e)
   {
     var items = e.Items
-      .Select(p => new ProductRecord(p.Id.Value, p.Name, p.UnitPrice))
+      .Select(ProductRecordFactory.FromDto)
       .ToList();
 
     return new ProductListResponse(items, e.Page, e.PerPage, e.TotalCount, e.TotalPages);

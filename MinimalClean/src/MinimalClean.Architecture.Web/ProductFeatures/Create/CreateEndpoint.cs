@@ -28,7 +28,27 @@ public class CreateEndpoint(IRepository<Product> repository) :
       s.Summary = "Create a new product";
       s.Description = "Creates a new product with the specified name and unit price.";
       s.ExampleRequest = new CreateProductRequest { Name = "Sample Product", UnitPrice = 19.99m };
-      s.ResponseExamples[201] = new ProductRecord(1, "Sample Product", 19.99m);
+      s.ResponseExamples[201] = ProductRecordFactory.FromDto(new ProductDto(
+        ProductId.From(1),
+        "Sample Product",
+        "sample-product",
+        "EduClean",
+        "General",
+        "general",
+        19.99m,
+        19.99m,
+        0m,
+        0,
+        0,
+        string.Empty,
+        0,
+        string.Empty,
+        string.Empty,
+        string.Empty,
+        string.Empty,
+        false,
+        false,
+        false));
 
       s.Responses[201] = "Product created successfully";
       s.Responses[400] = "Invalid request data";
@@ -50,7 +70,27 @@ public class CreateEndpoint(IRepository<Product> repository) :
     await _repository.AddAsync(product, cancellationToken);
     await _repository.SaveChangesAsync(cancellationToken);
 
-    var response = new ProductRecord(product.Id.Value, product.Name, product.UnitPrice);
+    var response = ProductRecordFactory.FromDto(new ProductDto(
+      product.Id,
+      product.Name,
+      product.Slug,
+      product.Instructor,
+      product.Category,
+      product.CategorySlug,
+      product.UnitPrice,
+      product.OriginalPrice,
+      product.Rating,
+      product.RatingCount,
+      product.Students,
+      product.Duration,
+      product.Lessons,
+      product.Level,
+      product.Language,
+      product.Thumbnail,
+      product.Description,
+      product.IsBestseller,
+      product.IsNew,
+      product.IsFlashSale));
     return TypedResults.Created($"/Products/{product.Id.Value}", response);
   }
 }

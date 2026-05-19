@@ -23,6 +23,8 @@ public static class MiddlewareConfig
       app.UseHsts();
     }
 
+    app.UseCors("FrontendDev");
+
     app.UseFastEndpoints();
 
     if (app.Environment.IsDevelopment())
