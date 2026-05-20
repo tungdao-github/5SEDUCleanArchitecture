@@ -2,11 +2,10 @@ import { useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router';
 import {
   Row, Col, Select, Slider, Checkbox, Radio, Input, Button, Space,
-  Typography, Tag, Breadcrumb, Pagination, Empty, Badge, Drawer,
+  Typography, Tag, Breadcrumb, Pagination, Empty, Drawer,
 } from 'antd';
 import {
-  FilterOutlined, SortAscendingOutlined, SearchOutlined,
-  AppstoreOutlined, BarsOutlined, FireOutlined,
+  FilterOutlined, SearchOutlined, AppstoreOutlined, BarsOutlined,
 } from '@ant-design/icons';
 import { categories as mockCategories, formatPrice } from '../data/mockData';
 import { useCourses } from '../services/useCourses';
@@ -20,16 +19,24 @@ const { Option } = Select;
 
 export default function CoursesPage() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
-  const [sort, setSort] = useState('popular');
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 2000000]);
+  const initialMinPrice = Math.max(0, Math.min(2000000, Number(searchParams.get('min')) || 0));
+  const initialMaxPrice = Math.max(initialMinPrice, Math.min(2000000, Number(searchParams.get('max')) || 2000000));
+  const initialRating = [0, 4, 4.5, 4.8].includes(Number(searchParams.get('rating')))
+    ? Number(searchParams.get('rating'))
+    : 0;
+  const initialPage = Math.max(1, Number(searchParams.get('page')) || 1);
+  const initialLevels = searchParams.get('levels')?.split(',').filter(Boolean) ?? [];
+  const initialView = searchParams.get('view') === 'list' ? 'list' : 'grid';
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>(initialView);
+  const [sort, setSort] = useState(searchParams.get('sort') || 'popular');
+  const [priceRange, setPriceRange] = useState<[number, number]>([initialMinPrice, initialMaxPrice]);
   const [selectedCategories, setSelectedCategories] = useState<string[]>(
     searchParams.get('cat') ? [searchParams.get('cat')!] : []
   );
-  const [selectedLevels, setSelectedLevels] = useState<string[]>([]);
-  const [selectedRating, setSelectedRating] = useState<number>(0);
+  const [selectedLevels, setSelectedLevels] = useState<string[]>(initialLevels);
+  const [selectedRating, setSelectedRating] = useState<number>(initialRating);
   const [keyword, setKeyword] = useState(searchParams.get('q') || '');
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(initialPage);
   const [filterDrawer, setFilterDrawer] = useState(false);
   const [cartCount] = useState(2);
   const { courses, isLoading: isLoadingCourses, error: courseApiError } = useCourses();
@@ -37,6 +44,72 @@ export default function CoursesPage() {
   const pageSize = 9;
 
   const displayCategories = categories.length > 0 ? categories : mockCategories;
+
+  const updateQueryParams = (nextValues: {
+    q?: string;
+    cat?: string[];
+    sale?: string | null;
+    levels?: string[];
+    rating?: number;
+    min?: number;
+    max?: number;
+    page?: number;
+    sort?: string;
+    view?: 'grid' | 'list';
+  }) => {
+    const next = new URLSearchParams(searchParams);
+    if (nextValues.q !== undefined) {
+      if (nextValues.q.trim()) next.set('q', nextValues.q.trim());
+      else next.delete('q');
+    }
+
+    if (nextValues.cat !== undefined) {
+      if (nextValues.cat.length > 0) next.set('cat', nextValues.cat[0]);
+      else next.delete('cat');
+    }
+
+    if (nextValues.sale !== undefined) {
+      if (nextValues.sale) next.set('sale', nextValues.sale);
+      else next.delete('sale');
+    }
+
+    if (nextValues.levels !== undefined) {
+      if (nextValues.levels.length > 0) next.set('levels', nextValues.levels.join(','));
+      else next.delete('levels');
+    }
+
+    if (nextValues.rating !== undefined) {
+      if (nextValues.rating > 0) next.set('rating', String(nextValues.rating));
+      else next.delete('rating');
+    }
+
+    if (nextValues.min !== undefined && nextValues.max !== undefined) {
+      if (nextValues.min > 0 || nextValues.max < 2000000) {
+        next.set('min', String(nextValues.min));
+        next.set('max', String(nextValues.max));
+      } else {
+        next.delete('min');
+        next.delete('max');
+      }
+    }
+
+    if (nextValues.page !== undefined) {
+      if (nextValues.page > 1) next.set('page', String(nextValues.page));
+      else next.delete('page');
+    }
+
+    if (nextValues.sort !== undefined) {
+      if (nextValues.sort && nextValues.sort !== 'popular') next.set('sort', nextValues.sort);
+      else next.delete('sort');
+    }
+
+    if (nextValues.view !== undefined) {
+      if (nextValues.view === 'list') next.set('view', 'list');
+      else next.delete('view');
+    }
+
+    setSearchParams(next);
+  };
 
   const filteredCourses = useMemo(() => {
     let result = [...courses];
@@ -67,7 +140,11 @@ export default function CoursesPage() {
           prefix={<SearchOutlined />}
           placeholder="Tên khóa học..."
           value={keyword}
-          onChange={e => { setKeyword(e.target.value); setPage(1); }}
+          onChange={e => {
+            setKeyword(e.target.value);
+            updateQueryParams({ q: e.target.value, page: 1 });
+            setPage(1);
+          }}
           allowClear
         />
       </div>
@@ -77,7 +154,12 @@ export default function CoursesPage() {
         <Checkbox.Group
           className="flex flex-col gap-2"
           value={selectedCategories}
-          onChange={(vals) => { setSelectedCategories(vals as string[]); setPage(1); }}
+          onChange={(vals) => {
+            const nextCategories = vals as string[];
+            setSelectedCategories(nextCategories);
+            updateQueryParams({ cat: nextCategories, page: 1 });
+            setPage(1);
+          }}
         >
           {displayCategories.map(cat => (
             <Checkbox key={cat.slug} value={cat.slug}>
@@ -95,7 +177,12 @@ export default function CoursesPage() {
           max={2000000}
           step={50000}
           value={priceRange}
-          onChange={(val) => setPriceRange(val as [number, number])}
+          onChange={(val) => {
+            const nextRange = val as [number, number];
+            setPriceRange(nextRange);
+            updateQueryParams({ min: nextRange[0], max: nextRange[1], page: 1 });
+            setPage(1);
+          }}
           tooltip={{ formatter: (v) => formatPrice(v!) }}
         />
         <div className="flex justify-between text-xs text-gray-500 mt-1">
@@ -109,7 +196,12 @@ export default function CoursesPage() {
         <Checkbox.Group
           className="flex flex-col gap-2"
           value={selectedLevels}
-          onChange={(vals) => { setSelectedLevels(vals as string[]); setPage(1); }}
+          onChange={(vals) => {
+            const nextLevels = vals as string[];
+            setSelectedLevels(nextLevels);
+            updateQueryParams({ levels: nextLevels, page: 1 });
+            setPage(1);
+          }}
         >
           {['Từ cơ bản', 'Trung cấp', 'Nâng cao'].map(level => (
             <Checkbox key={level} value={level}>
@@ -121,7 +213,11 @@ export default function CoursesPage() {
 
       <div>
         <Text className="font-semibold text-gray-800 block mb-3">⭐ Đánh Giá Tối Thiểu</Text>
-        <Radio.Group value={selectedRating} onChange={e => { setSelectedRating(e.target.value); setPage(1); }} className="flex flex-col gap-2">
+        <Radio.Group value={selectedRating} onChange={e => {
+          setSelectedRating(e.target.value);
+          updateQueryParams({ rating: e.target.value, page: 1 });
+          setPage(1);
+        }} className="flex flex-col gap-2">
           {[0, 4, 4.5, 4.8].map(r => (
             <Radio key={r} value={r}>
               <span className="text-sm">
@@ -140,6 +236,7 @@ export default function CoursesPage() {
           setSelectedRating(0);
           setPriceRange([0, 2000000]);
           setKeyword('');
+          updateQueryParams({ q: '', cat: [], levels: [], rating: 0, min: 0, max: 2000000, page: 1, sale: null });
           setPage(1);
         }}
       >
@@ -199,19 +296,34 @@ export default function CoursesPage() {
                 {selectedCategories.length > 0 && (
                   <div className="flex gap-1 flex-wrap">
                     {selectedCategories.map(cat => (
-                      <Tag
+                        <Tag
                         key={cat}
                         closable
-                        onClose={() => setSelectedCategories(prev => prev.filter(c => c !== cat))}
+                        onClose={() => {
+                          setSelectedCategories(prev => {
+                            const nextCategories = prev.filter(c => c !== cat);
+                            updateQueryParams({ cat: nextCategories, page: 1 });
+                            return nextCategories;
+                          });
+                        }}
                       >
-                        {categories.find(c => c.slug === cat)?.name}
+                        {displayCategories.find(c => c.slug === cat)?.name ?? cat}
                       </Tag>
                     ))}
                   </div>
                 )}
               </div>
               <div className="flex items-center gap-3">
-                <Select value={sort} onChange={setSort} style={{ width: 180 }} size="small">
+                <Select
+                  value={sort}
+                  onChange={(nextSort) => {
+                    setSort(nextSort);
+                    updateQueryParams({ sort: nextSort, page: 1 });
+                    setPage(1);
+                  }}
+                  style={{ width: 180 }}
+                  size="small"
+                >
                   <Option value="popular">Phổ biến nhất</Option>
                   <Option value="newest">Mới nhất</Option>
                   <Option value="rating">Đánh giá cao</Option>
@@ -222,12 +334,18 @@ export default function CoursesPage() {
                   <Button
                     icon={<AppstoreOutlined />}
                     type={viewMode === 'grid' ? 'primary' : 'default'}
-                    onClick={() => setViewMode('grid')}
+                    onClick={() => {
+                      setViewMode('grid');
+                      updateQueryParams({ view: 'grid' });
+                    }}
                   />
                   <Button
                     icon={<BarsOutlined />}
                     type={viewMode === 'list' ? 'primary' : 'default'}
-                    onClick={() => setViewMode('list')}
+                    onClick={() => {
+                      setViewMode('list');
+                      updateQueryParams({ view: 'list' });
+                    }}
                   />
                 </Space.Compact>
               </div>
@@ -236,7 +354,19 @@ export default function CoursesPage() {
             {paginatedCourses.length === 0 ? (
               <div className="bg-white rounded-xl p-16 text-center shadow-sm">
                 <Empty description="Không tìm thấy khóa học phù hợp" />
-                <Button type="primary" className="mt-4" onClick={() => { setSelectedCategories([]); setKeyword(''); }}>
+                <Button
+                  type="primary"
+                  className="mt-4"
+                  onClick={() => {
+                    setSelectedCategories([]);
+                    setSelectedLevels([]);
+                    setSelectedRating(0);
+                    setPriceRange([0, 2000000]);
+                    setKeyword('');
+                    updateQueryParams({ q: '', cat: [], levels: [], rating: 0, min: 0, max: 2000000, page: 1, sale: null });
+                    setPage(1);
+                  }}
+                >
                   Xóa bộ lọc
                 </Button>
               </div>
@@ -264,7 +394,11 @@ export default function CoursesPage() {
                     current={page}
                     total={filteredCourses.length}
                     pageSize={pageSize}
-                    onChange={p => { setPage(p); window.scrollTo(0, 0); }}
+                    onChange={p => {
+                      setPage(p);
+                      updateQueryParams({ page: p });
+                      window.scrollTo(0, 0);
+                    }}
                     showSizeChanger={false}
                     showTotal={(total, range) => `${range[0]}-${range[1]} / ${total} khóa học`}
                   />

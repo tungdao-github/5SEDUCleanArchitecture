@@ -1,12 +1,12 @@
 import { useState, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router';
 import {
-  Input, Row, Col, Card, Tag, Button, Tabs, Typography, Empty, Spin, Select,
+  Input, Row, Col, Card, Tag, Button, Tabs, Typography, Empty, Select,
 } from 'antd';
 import {
-  SearchOutlined, FilterOutlined, AudioOutlined, FireOutlined,
+  SearchOutlined, AudioOutlined, FireOutlined,
 } from '@ant-design/icons';
-import { courses, blogPosts, formatPrice } from '../data/mockData';
+import { courses, blogPosts } from '../data/mockData';
 import CourseCard from '../components/shared/CourseCard';
 import MainLayout from '../components/layout/MainLayout';
 import { message } from 'antd';
@@ -20,17 +20,50 @@ export default function SearchPage() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const [query, setQuery] = useState(searchParams.get('q') || '');
-  const [sort, setSort] = useState('popular');
+  const [sort, setSort] = useState(searchParams.get('sort') || 'popular');
+  const [activeTab, setActiveTab] = useState(searchParams.get('tab') || 'courses');
   const [listening, setListening] = useState(false);
+
+  const updateSearchParams = (nextValues: { q?: string; sort?: string; tab?: string }) => {
+    const next = new URLSearchParams(searchParams);
+    if (nextValues.q !== undefined) {
+      if (nextValues.q.trim()) next.set('q', nextValues.q.trim());
+      else next.delete('q');
+    }
+
+    if (nextValues.sort !== undefined) {
+      if (nextValues.sort && nextValues.sort !== 'popular') next.set('sort', nextValues.sort);
+      else next.delete('sort');
+    }
+
+    if (nextValues.tab !== undefined) {
+      if (nextValues.tab && nextValues.tab !== 'courses') next.set('tab', nextValues.tab);
+      else next.delete('tab');
+    }
+
+    setSearchParams(next);
+  };
 
   const filteredCourses = useMemo(() => {
     if (!query.trim()) return courses;
-    return courses.filter(c =>
+    const result = courses.filter(c =>
       c.title.toLowerCase().includes(query.toLowerCase()) ||
       c.description.toLowerCase().includes(query.toLowerCase()) ||
       c.tags.some(t => t.toLowerCase().includes(query.toLowerCase()))
     );
-  }, [query]);
+
+    switch (sort) {
+      case 'newest':
+        return result.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
+      case 'rating':
+        return result.sort((a, b) => b.rating - a.rating);
+      case 'price-asc':
+        return result.sort((a, b) => a.price - b.price);
+      case 'popular':
+      default:
+        return result.sort((a, b) => b.students - a.students);
+    }
+  }, [query, sort]);
 
   const filteredPosts = useMemo(() => {
     if (!query.trim()) return blogPosts;
@@ -53,7 +86,7 @@ export default function SearchPage() {
     recognition.onresult = (e: any) => {
       const text = e.results[0][0].transcript;
       setQuery(text);
-      setSearchParams({ q: text });
+      updateSearchParams({ q: text });
       setListening(false);
     };
     recognition.onerror = () => {
@@ -65,7 +98,7 @@ export default function SearchPage() {
 
   const handleSearch = (val: string) => {
     setQuery(val);
-    setSearchParams({ q: val });
+    updateSearchParams({ q: val });
   };
 
   return (
@@ -136,7 +169,14 @@ export default function SearchPage() {
                 ({filteredCourses.length} khóa học, {filteredPosts.length} bài viết)
               </Text>
             </div>
-            <Select value={sort} onChange={setSort} style={{ width: 160 }}>
+            <Select
+              value={sort}
+              onChange={(nextSort) => {
+                setSort(nextSort);
+                updateSearchParams({ sort: nextSort });
+              }}
+              style={{ width: 160 }}
+            >
               <Option value="popular">Phổ biến nhất</Option>
               <Option value="newest">Mới nhất</Option>
               <Option value="rating">Đánh giá cao</Option>
@@ -146,7 +186,11 @@ export default function SearchPage() {
         )}
 
         <Tabs
-          defaultActiveKey="courses"
+          activeKey={activeTab}
+          onChange={(tab) => {
+            setActiveTab(tab);
+            updateSearchParams({ tab });
+          }}
           items={[
             {
               key: 'courses',

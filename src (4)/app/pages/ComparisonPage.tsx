@@ -64,7 +64,7 @@ export default function ComparisonPage() {
               showSearch
               placeholder="Chọn khóa học..."
               style={{ width: 320 }}
-              filterOption={(input, option) => (option?.children as string).toLowerCase().includes(input.toLowerCase())}
+              filterOption={(input, option) => String(option?.children ?? '').toLowerCase().includes(input.toLowerCase())}
               onSelect={(id: number) => addCourse(id)}
               value={undefined}
             >

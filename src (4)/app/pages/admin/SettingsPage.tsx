@@ -79,7 +79,6 @@ export default function SettingsPage() {
 
       <Tabs
         defaultActiveKey="general"
-        tabPlacement="left"
         className="admin-settings-tabs"
         items={[
           {
