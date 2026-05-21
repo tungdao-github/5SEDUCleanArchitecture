@@ -315,7 +315,6 @@ export default function CartPage() {
       </div>
     </MainLayout>
   );
-}
 
   return (
     <MainLayout cartCount={cartItems.length}>
@@ -350,11 +349,11 @@ export default function CartPage() {
               <Card className="rounded-xl shadow-sm border-gray-100 mb-4">
                 <div className="flex items-center justify-between mb-4">
                   <Checkbox
-                    checked={selectedItems.length === cartItems.length}
-                    indeterminate={selectedItems.length > 0 && selectedItems.length < cartItems.length}
+                    checked={selectedItems.length === displayItems.length}
+                    indeterminate={selectedItems.length > 0 && selectedItems.length < displayItems.length}
                     onChange={e => selectAll(e.target.checked)}
                   >
-                    <span className="font-medium">Chọn tất cả ({cartItems.length})</span>
+                    <span className="font-medium">Chọn tất cả ({displayItems.length})</span>
                   </Checkbox>
                   {selectedItems.length > 0 && (
                     <Button
@@ -362,7 +361,7 @@ export default function CartPage() {
                       danger
                       size="small"
                       onClick={() => {
-                        setCartItems(prev => prev.filter(i => !i.selected));
+                        selectedItems.forEach(item => removeItem(item.productId));
                         message.success('Đã xóa các mục đã chọn');
                       }}
                     >
@@ -372,9 +371,9 @@ export default function CartPage() {
                 </div>
 
                 <div className="space-y-4">
-                  {cartItems.map(item => (
-                    <div key={item.id} className={`flex gap-4 p-4 rounded-xl border transition-colors ${item.selected ? 'border-blue-200 bg-blue-50/50' : 'border-gray-100 bg-white'}`}>
-                      <Checkbox checked={item.selected} onChange={() => toggleSelect(item.id)} className="mt-1" />
+                  {displayItems.map(item => (
+                    <div key={item.productId} className={`flex gap-4 p-4 rounded-xl border transition-colors ${item.selected ? 'border-blue-200 bg-blue-50/50' : 'border-gray-100 bg-white'}`}>
+                      <Checkbox checked={item.selected} onChange={() => toggleSelect(item.productId)} className="mt-1" />
                       <img
                         src={item.thumbnail}
                         alt={item.title}
@@ -416,7 +415,7 @@ export default function CartPage() {
                             size="small"
                             icon={<DeleteOutlined />}
                             danger
-                            onClick={() => removeItem(item.id)}
+                            onClick={() => removeItem(item.productId)}
                           />
                         </div>
                       </div>
