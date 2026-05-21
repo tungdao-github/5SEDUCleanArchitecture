@@ -86,7 +86,7 @@ export default function CourseDetailPage() {
   };
 
   return (
-    <MainLayout cartCount={cartCount}>
+    <MainLayout cartCount={cartItems.length}>
       {/* Header */}
       <div className="bg-gray-900 text-white py-8">
         <div className="max-w-7xl mx-auto px-4">

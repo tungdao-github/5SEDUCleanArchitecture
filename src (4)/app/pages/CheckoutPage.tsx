@@ -316,7 +316,6 @@ export default function CheckoutPage() {
       </div>
     </MainLayout>
   );
-}
 
   if (done) {
     return (

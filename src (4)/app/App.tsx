@@ -48,49 +48,48 @@ export default function App() {
   return (
     <ConfigProvider locale={viVN} theme={antdTheme}>
       <AntdApp>
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<HomePage />} />
-          <Route path="/courses" element={<CoursesPage />} />
-          <Route path="/courses/:slug" element={<CourseDetailPage />} />
-          <Route path="/cart" element={<CartPage />} />
-          <Route path="/checkout" element={<CheckoutPage />} />
-          <Route path="/search" element={<SearchPage />} />
-          <Route path="/compare" element={<ComparisonPage />} />
-          <Route path="/blog" element={<BlogListPage />} />
-          <Route path="/blog/:slug" element={<BlogDetailPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/profile" element={<ProfilePage />} />
-          <Route path="/orders" element={<OrdersPage />} />
-          <Route path="/wishlist" element={<WishlistPage />} />
-          <Route path="/learn/:slug" element={<LearningPage />} />
-          <Route path="/certificate/:slug" element={<CertificatePage />} />
-          <Route path="/notifications" element={<NotificationsPage />} />
-          <Route path="/history" element={<HistoryPage />} />
-          <Route path="/admin" element={<DashboardPage />} />
-          <Route path="/admin/courses" element={<CoursesAdminPage />} />
-          <Route path="/admin/orders" element={<OrdersAdminPage />} />
-          <Route path="/admin/users" element={<UsersAdminPage />} />
-          <Route path="/admin/settings" element={<SettingsPage />} />
-          <Route path="/admin/blog" element={<BlogAdminPage />} />
-          <Route path="/admin/categories" element={<CategoriesAdminPage />} />
-          <Route path="/admin/coupons" element={<SettingsPage />} />
-          <Route path="/admin/admins" element={<UsersAdminPage />} />
-          <Route path="/admin/roles" element={<RolesPage />} />
-          <Route path="/admin/reviews" element={<ReviewsAdminPage />} />
-          <Route path="/admin/media" element={<MediaPage />} />
-          <Route path="/admin/appearance" element={<AppearancePage />} />
-          <Route path="/admin/activity-log" element={<ActivityLogPage />} />
-          <Route path="/admin/analytics" element={<AnalyticsPage />} />
-          <Route path="/admin/analytics/revenue" element={<AnalyticsPage />} />
-          <Route path="/admin/analytics/students" element={<AnalyticsPage />} />
-          <Route path="/admin/analytics/courses" element={<AnalyticsPage />} />
-          <Route path="/admin/appearance" element={<SettingsPage />} />
-          <Route path="/admin/seo" element={<SettingsPage />} />
-          <Route path="/admin/payments" element={<SettingsPage />} />
-          <Route path="*" element={<HomePage />} />
-        </Routes>
-      </BrowserRouter>
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<HomePage />} />
+            <Route path="/courses" element={<CoursesPage />} />
+            <Route path="/courses/:slug" element={<CourseDetailPage />} />
+            <Route path="/cart" element={<CartPage />} />
+            <Route path="/checkout" element={<CheckoutPage />} />
+            <Route path="/search" element={<SearchPage />} />
+            <Route path="/compare" element={<ComparisonPage />} />
+            <Route path="/blog" element={<BlogListPage />} />
+            <Route path="/blog/:slug" element={<BlogDetailPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/profile" element={<ProfilePage />} />
+            <Route path="/orders" element={<OrdersPage />} />
+            <Route path="/wishlist" element={<WishlistPage />} />
+            <Route path="/learn/:slug" element={<LearningPage />} />
+            <Route path="/certificate/:slug" element={<CertificatePage />} />
+            <Route path="/notifications" element={<NotificationsPage />} />
+            <Route path="/history" element={<HistoryPage />} />
+            <Route path="/admin" element={<DashboardPage />} />
+            <Route path="/admin/courses" element={<CoursesAdminPage />} />
+            <Route path="/admin/orders" element={<OrdersAdminPage />} />
+            <Route path="/admin/users" element={<UsersAdminPage />} />
+            <Route path="/admin/settings" element={<SettingsPage />} />
+            <Route path="/admin/blog" element={<BlogAdminPage />} />
+            <Route path="/admin/categories" element={<CategoriesAdminPage />} />
+            <Route path="/admin/coupons" element={<SettingsPage />} />
+            <Route path="/admin/admins" element={<UsersAdminPage />} />
+            <Route path="/admin/roles" element={<RolesPage />} />
+            <Route path="/admin/reviews" element={<ReviewsAdminPage />} />
+            <Route path="/admin/media" element={<MediaPage />} />
+            <Route path="/admin/appearance" element={<AppearancePage />} />
+            <Route path="/admin/activity-log" element={<ActivityLogPage />} />
+            <Route path="/admin/analytics" element={<AnalyticsPage />} />
+            <Route path="/admin/analytics/revenue" element={<AnalyticsPage />} />
+            <Route path="/admin/analytics/students" element={<AnalyticsPage />} />
+            <Route path="/admin/analytics/courses" element={<AnalyticsPage />} />
+            <Route path="/admin/seo" element={<SettingsPage />} />
+            <Route path="/admin/payments" element={<SettingsPage />} />
+            <Route path="*" element={<HomePage />} />
+          </Routes>
+        </BrowserRouter>
       </AntdApp>
     </ConfigProvider>
   );
